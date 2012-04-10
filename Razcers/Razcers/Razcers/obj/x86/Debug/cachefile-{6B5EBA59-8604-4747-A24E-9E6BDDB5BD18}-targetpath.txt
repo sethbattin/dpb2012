@@ -1,0 +1,26 @@
+Content\B2-texure_inc.xnb
+Content\B2.xnb
+Content\B2_test.xnb
+Content\Ship.xnb
+Content\B2text2.xnb
+Content\B2(3).xnb
+Content\B2(4).xnb
+Content\B2 (6).xnb
+Content\BubbleShip.xnb
+Content\Effect1.xnb
+Content\Effect2.xnb
+Content\perlin-noise.xnb
+Content\ivory.xnb
+Content\leopard.xnb
+Content\SpriteFont1.xnb
+Content\BARK5_0.xnb
+Content\JP_Brick01_Bump_0.xnb
+Content\ShipDiffuse_0.xnb
+Content\leopard_0.xnb
+Content\ivory_0.xnb
+Content\leopard_1.xnb
+Content\ivory_1.xnb
+Content\leopard_2.xnb
+Content\ivory_2.xnb
+Content\leopard_3.xnb
+Content\ivory_3.xnb
