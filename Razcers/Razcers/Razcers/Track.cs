@@ -63,6 +63,9 @@ namespace Razcers
         short[] indices;
         IndexBuffer indexBuffer;
 
+        VertexPositionColorTexture[] skybox;
+        Texture2D skyboxTex;
+        BasicEffect basicEffect;
 
         Texture2D heightMap;
 
@@ -72,9 +75,69 @@ namespace Razcers
 
         public TrackWeather weather;
 
+
+
         public Track()
         {
             weather = new TrackWeather();
+            skybox = new VertexPositionColorTexture[36];
+
+            new VertexPositionColorTexture[] {
+                new VertexPositionColorTexture(
+                    new Vector3(-1, 1, 1),
+                    Color.White,
+                    new Vector2( 0, 0)),
+                new VertexPositionColorTexture(
+                    new Vector3(-1,-1, 1),
+                    Color.White,
+                    new Vector2( 0, 1)),
+                new VertexPositionColorTexture(
+                    new Vector3( 1, 1, 1),
+                    Color.White,
+                    new Vector2( 1, 0)),
+                new VertexPositionColorTexture(
+                    new Vector3( 1, 1, 1),
+                    Color.White,
+                    new Vector2( 1, 0)),
+                new VertexPositionColorTexture(
+                    new Vector3(-1,-1, 1),
+                    Color.White,
+                    new Vector2( 0, 1)),
+                new VertexPositionColorTexture(
+                    new Vector3( 1,-1, 1),
+                    Color.White,
+                    new Vector2( 1, 1))
+
+            }.CopyTo(skybox, 0);
+
+            Matrix[] rotates = new Matrix[]
+            {
+                Matrix.CreateFromAxisAngle(Vector3.Up,  MathHelper.PiOver2),
+                Matrix.CreateFromAxisAngle(Vector3.Left,     MathHelper.PiOver2),
+                Matrix.CreateFromAxisAngle(Vector3.Down, MathHelper.PiOver2),
+                Matrix.CreateFromAxisAngle(Vector3.Right,    MathHelper.PiOver2),
+                Matrix.CreateFromAxisAngle(Vector3.Right,    MathHelper.Pi),
+            };
+            int j = 0;
+            foreach (Matrix rot in rotates)
+            {
+                j++;
+                for (int i = 0; i < 6; i++)
+                {
+                    skybox[j * 6 + i] = new VertexPositionColorTexture(
+                        Vector3.Transform(skybox[i].Position, rot),
+                        Color.White,
+                        skybox[i].TextureCoordinate);
+                }
+            }
+
+
+
+            float mult = 10000f;
+            for(int i = 0; i < skybox.Length; i++)
+            {
+                skybox[i].Position *= mult;
+            }
         }
 
         /// <summary>
@@ -85,6 +148,7 @@ namespace Razcers
         {
             //load small items(minimap, other?)
             contentSmallLoaded = true;
+            
         }
 
         /// <summary>
@@ -94,7 +158,15 @@ namespace Razcers
         /// <param name="graphicsDevice">Game instance's graphicsDevice</param>
         public void LoadContentLarge(ContentManager Content, GraphicsDevice graphicsDevice)
         {
+            basicEffect = new BasicEffect(graphicsDevice);
+            
             heightMap = Content.Load<Texture2D>("perlin-noise");
+
+            //skyboxTex = Content.Load<TextureCube>("skyboxclouds");
+            skyboxTex = Content.Load<Texture2D>("clouds");
+            basicEffect.TextureEnabled = true;
+            basicEffect.Texture = skyboxTex;
+
 
             effect = Content.Load<Effect>("Effect2");
 
@@ -107,6 +179,7 @@ namespace Razcers
             effect.Parameters["ambLight"].SetValue(weather.lightAmbSky.ToVector3());
 
             initLandscape(graphicsDevice, 256, 256, 1, -32, 32);
+
 
             contentLargeLoaded = true;
         }
@@ -292,6 +365,9 @@ namespace Razcers
 
             //Matrix world = Matrix.CreateWorld(-player.position, Vector3.UnitZ, Vector3.UnitY);
             Matrix world = Matrix.Identity;
+
+            DrawSkybox(graphicsDevice, camera, world);
+
             effect.Parameters["World"].SetValue(world);
             effect.Parameters["View"].SetValue(camera.view);
             effect.Parameters["Projection"].SetValue(camera.projection);
@@ -314,6 +390,35 @@ namespace Razcers
                     indices.Length / 3   // number of primitives to draw
                 );
             }
+
+        }
+
+        private void DrawSkybox(GraphicsDevice graphicsDevice, ChaseCamera camera, Matrix world)
+        {
+
+            basicEffect.World = world;
+            basicEffect.View = camera.view;
+            basicEffect.Projection = camera.projection;
+            basicEffect.CurrentTechnique = basicEffect.Techniques[0];
+
+            //RasterizerState rState0 = graphicsDevice.RasterizerState;
+            //RasterizerState rState1 = new RasterizerState();
+            //rState1.CullMode = CullMode.None;
+            //graphicsDevice.RasterizerState = rState1;
+            foreach (EffectPass pass in basicEffect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+
+                graphicsDevice.DrawUserPrimitives<VertexPositionColorTexture>(
+                    PrimitiveType.TriangleList,
+                    skybox,
+                    0,
+                    skybox.Length / 3
+                );
+
+
+            }
+            //graphicsDevice.RasterizerState = rState0;
         }
 
 

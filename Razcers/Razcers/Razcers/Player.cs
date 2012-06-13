@@ -103,18 +103,41 @@ namespace Razcers
             Matrix[] transforms = new Matrix[model.Bones.Count];
             model.CopyAbsoluteBoneTransformsTo(transforms);
 
-            ModelMesh mesh;
+            //DrawMeshesWierdly(transforms);
+            DrawMeshesNormally(transforms);
 
-            //foreach (ModelMesh mesh in model.Meshes)
-            //{
+            base.Draw(gameTime);
+        }
 
-            mesh = model.Meshes[0];
+        private void DrawMeshesNormally(Matrix[] transforms)
+        {
+            Matrix Ailervator = Matrix.Identity;
+
+            foreach (ModelMesh mesh in model.Meshes)
+            {
+
+                switch (mesh.Name)
+                {
+                    case "LRudder":
+                        Ailervator = Matrix.CreateRotationX(
+                            input.LeftAilervator(playerIndex, inputMode));
+                        break;
+                    case "RRudder":
+                        Ailervator = Matrix.CreateRotationX(
+                            input.RightAilervator(playerIndex, inputMode));
+                        break;
+                    default:
+                        Ailervator = Matrix.Identity;
+                        break;
+                }
+                //mesh = model.Meshes[0];
 
                 foreach (BasicEffect effect in mesh.Effects)
                 {
                     effect.EnableDefaultLighting();
-                    effect.World = transforms[mesh.ParentBone.Index] * 
-                        Matrix.CreateScale(.01f) * 
+                    effect.World = transforms[mesh.ParentBone.Index] *
+                        Matrix.CreateScale(.01f) *
+                        Ailervator *
                         Matrix.CreateWorld(position, direction, top);
                     //effect.World = transforms[mesh.ParentBone.Index] * camera.world;
 
@@ -123,38 +146,63 @@ namespace Razcers
                     effect.Projection = camera.projection;
                 }
                 mesh.Draw();
+            }
+        }
+
+        private void DrawMeshesWierdly(Matrix[] transforms)
+        {
+
+            ModelMesh mesh;
+
+            //foreach (ModelMesh mesh in model.Meshes)
+            //{
+
+            mesh = model.Meshes[0];
+
+            foreach (BasicEffect effect in mesh.Effects)
+            {
+
+                effect.EnableDefaultLighting();
+                effect.World = transforms[mesh.ParentBone.Index] *
+                    Matrix.CreateScale(.01f) *
+                    Matrix.CreateWorld(position, direction, top);
+                //effect.World = transforms[mesh.ParentBone.Index] * camera.world;
+
+                // Use the matrices provided by the chase camera
+                effect.View = camera.view;
+                effect.Projection = camera.projection;
+            }
+            mesh.Draw();
             //}
 
-                mesh = model.Meshes[1];
-                foreach (BasicEffect effect in mesh.Effects)
-                {
-                    effect.EnableDefaultLighting();
-                    effect.View = camera.view;
-                    effect.Projection = camera.projection;
-                    effect.World = 
-                        transforms[mesh.ParentBone.Index] *
-                        Matrix.CreateScale(new Vector3(0.01f, 0.01f, 0.01f)) *
-                        Matrix.CreateRotationX(input.LeftAilervator(playerIndex, inputMode)) * 
-                        Matrix.CreateWorld(position, direction, top);
-                }
+            mesh = model.Meshes[1];
+            foreach (BasicEffect effect in mesh.Effects)
+            {
+                effect.EnableDefaultLighting();
+                effect.View = camera.view;
+                effect.Projection = camera.projection;
+                effect.World =
+                    transforms[mesh.ParentBone.Index] *
+                    Matrix.CreateScale(new Vector3(0.01f, 0.01f, 0.01f)) *
+                    Matrix.CreateRotationX(input.LeftAilervator(playerIndex, inputMode)) *
+                    Matrix.CreateWorld(position, direction, top);
+            }
 
-                mesh = model.Meshes[2];
-                mesh.Draw();
-                foreach (BasicEffect effect in mesh.Effects)
-                {
-                    effect.EnableDefaultLighting();
-                    effect.View = camera.view;
-                    effect.Projection = camera.projection;
-                    effect.World =
-                        transforms[mesh.ParentBone.Index] *
-                        Matrix.CreateScale(new Vector3(0.01f, 0.01f, 0.01f)) *
-                        Matrix.CreateRotationX(input.RightAilervator(playerIndex, inputMode)) * 
-                        Matrix.CreateWorld(position, direction, top);
-                }
+            mesh = model.Meshes[2];
+            mesh.Draw();
+            foreach (BasicEffect effect in mesh.Effects)
+            {
+                effect.EnableDefaultLighting();
+                effect.View = camera.view;
+                effect.Projection = camera.projection;
+                effect.World =
+                    transforms[mesh.ParentBone.Index] *
+                    Matrix.CreateScale(new Vector3(0.01f, 0.01f, 0.01f)) *
+                    Matrix.CreateRotationX(input.RightAilervator(playerIndex, inputMode)) *
+                    Matrix.CreateWorld(position, direction, top);
+            }
 
-                mesh.Draw();
-
-            base.Draw(gameTime);
+            mesh.Draw();
         }
     }
 }
